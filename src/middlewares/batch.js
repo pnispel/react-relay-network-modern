@@ -10,6 +10,7 @@ import RRNLError from '../RRNLError';
 
 // Max out at roughly 100kb (express-graphql imposed max)
 const DEFAULT_BATCH_SIZE = 102400;
+const DEFAULT_MAX_OPERATION_COUNT = 10
 
 type Headers = { [name: string]: string };
 
@@ -113,6 +114,10 @@ function passThroughBatch(req: RelayRequest, next, opts) {
 
   if (singleton.batcher.bodySize + bodyLength + 1 > opts.maxBatchSize) {
     singleton.batcher = prepareNewBatcher(next, opts);
+  }
+
+  if (singleton.batcher.requestList.length + 1 > DEFAULT_MAX_BATCH_COUNT) {
+    singleton.batcher = prepareNewBatcher(next, opts)
   }
 
   // +1 accounts for tailing comma after joining
